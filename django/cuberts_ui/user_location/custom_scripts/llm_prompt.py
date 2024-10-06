@@ -38,8 +38,8 @@ VERY IMPORTANT: Please base your analysis only on the provided data and avoid an
     return prompt
 
 
-def generate_ai_summary(data_dict):
-    genai.configure(api_key="AIzaSyDqMSWju-9GSygVabOtfZbkc1Y3kCnKnRg")
+def generate_ai_summary(data_dict,key):
+    genai.configure(api_key=key)
     
     # Set up the model
     generation_config = {
