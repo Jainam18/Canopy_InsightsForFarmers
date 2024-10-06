@@ -1,12 +1,12 @@
 
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { MapContainer, TileLayer, Rectangle, useMap, FeatureGroup } from 'react-leaflet';
 import { useParams, useNavigate } from 'react-router-dom';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import 'leaflet-draw/dist/leaflet.draw.css';
 import * as ReactLeafletDraw from 'react-leaflet-draw';
-
+import LoadingOverlay from '../Loading/LoadingOverlay';
 import styled from 'styled-components';
 
 const MapWrapper = styled.div`
@@ -67,7 +67,10 @@ const FarmSelectionMap = () => {
   const [boundingBox, setBoundingBox] = useState(null);
 
   const [chartInfo, setChartInfo] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const [latitude, setLatitude] = useState(null);
+  const [longitude, setLongitude] = useState(null);
+
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
   console.log(boundingBox, "boundingBox")
@@ -81,9 +84,34 @@ const FarmSelectionMap = () => {
       console.log('Selected Area:');
       console.log('Southwest:', sw.lat, sw.lng);
       console.log('Northeast:', ne.lat, ne.lng);
-      const lat =  (sw.lat + ne.lat)/2
-      const long =  (sw.lng + ne.lng)/2
+
+      setLatitude((sw.lat + ne.lat)/2)
+      setLongitude((sw.lng + ne.lng)/2)
+    }
+  };
+
+  // useEffect(() => {
+  //   if(chartInfo) {
+  //     navigate(`/farm-view/${stateName}`, {
+  //       state: {
+  //         // north: _northEast.lat,
+  //         // south: _southWest.lat,
+  //         // east: _northEast.lng,
+  //         // west: _southWest.lng,
+  //         latitude: latitude,
+  //         longitude: longitude,
+  //         data: chartInfo
+  //       }
+  //     });
+  //   }
+  // }, [chartInfo])
+
+  const handleViewFarm = async () => {
+    if (boundingBox) {
+      const { _northEast, _southWest } = boundingBox;
       try {
+        setLoading(true);
+
         const data = await fetch('http://localhost:8000/api/location-input/', {
           method: 'POST',
           credentials: 'include',
@@ -95,38 +123,30 @@ const FarmSelectionMap = () => {
           },
           body: JSON.stringify({
             // Your data goes here
-            latitude: lat,
-            longitude: long,
+            latitude: latitude,
+            longitude: longitude,
             area: 2
           })
         }).then(response => response.json())
-        .then(data => {
-          console.log('Success:', data);
-        })
-        .catch((error) => {
-          console.error('Error:', error);
-        });
-
-        setChartInfo(data);
+        console.log("Data", data)
+        // setChartInfo(data);
         setLoading(false);
+        navigate(`/farm-view/${stateName}`, {
+          state: {
+            // north: _northEast.lat,
+            // south: _southWest.lat,
+            // east: _northEast.lng,
+            // west: _southWest.lng,
+            latitude: latitude,
+            longitude: longitude,
+            data: data
+          }});
       } catch (err) {
         setError(err.message);
         setLoading(false);
       }
-    }
-  };
 
-  const handleViewFarm = () => {
-    if (boundingBox) {
-      const { _northEast, _southWest } = boundingBox;
-      navigate(`/farm-view/${stateName}`, {
-        state: {
-          north: _northEast.lat,
-          south: _southWest.lat,
-          east: _northEast.lng,
-          west: _southWest.lng
-        }
-      });
+     
     }
   };
 
@@ -162,8 +182,11 @@ const FarmSelectionMap = () => {
 
 return (
     <div>
+            <LoadingOverlay isLoading={loading} />
+
       <Banner>Select your farm in {stateName}</Banner>
       <MapWrapper>
+        
         <MapContainer 
           center={center}
           zoom={zoom} 

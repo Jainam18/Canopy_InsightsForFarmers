@@ -2,13 +2,16 @@ import React, { useEffect, useRef } from 'react';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import { useLocation } from 'react-router-dom';
+import ChartComponent2 from '../ChartComponent2';
 
-const FarmView = ({ center = [51.505, -0.09], zoom = 13 }) => {
+const FarmView = ({ center = [51.505, -0.09], zoom = 15 }) => {
   const mapRef = useRef(null);
   const location = useLocation();
-  const { north, south, east, west } = location.state;
-  center = [(north+south)/2, (east+west)/2]
+  const { latitude, longitude, data } = location.state;
+  center = [latitude, longitude]
   console.log("center", center, location)
+  console.log("data", data)
+
   useEffect(() => {
     if (!mapRef.current) return;
 
@@ -39,7 +42,9 @@ const FarmView = ({ center = [51.505, -0.09], zoom = 13 }) => {
     };
   }, [center, zoom]);
 
-  return <div ref={mapRef} style={{ height: '300px', width: '100%' }} />;
+  return <><div ref={mapRef} style={{ height: '300px', width: '100%' }} />
+  <ChartComponent2 data={{lat_long_data: data.lat_long_data}}/>
+  </>;
 };
 
 export default FarmView;

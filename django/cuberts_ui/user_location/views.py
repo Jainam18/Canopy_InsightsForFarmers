@@ -29,12 +29,13 @@ def create_user(request):
 @csrf_exempt
 def user_login(request):
     if request.method == 'POST':
-        username = request.POST.get('username')
-        password = request.POST.get('password')
-        # if not username or not password:
-        #     return JsonResponse({'error': 'Username and password are required'}, status=400)
+        data = json.loads(request.body)
+        username = data.get("username")
+        password = data.get("password")
+        if not username or not password:
+            return JsonResponse({'error': 'Username and password are required'}, status=400)
         
-        user = authenticate(request, username='ABC', password='ABC@abc')
+        user = authenticate(request, username="ABC", password="ABC@abc")
         if user is not None:
             login(request, user)
             return JsonResponse({'status': 'success', 'user_id': user.id})
@@ -89,41 +90,44 @@ def delete_user(request, user_id):
 @login_required
 def location_input(request):
     if request.method == 'POST':
-        print(request.POST)
-        # form = LocationForm(request.body)
-        # if form.is_valid():
-        #     latitude = form.cleaned_data['latitude']
-        #     longitude = form.cleaned_data['longitude']
-        #     area = form.cleaned_data['area']
         data = json.loads(request.body)
         latitude = float(data.get('latitude'))
         longitude = float(data.get('longitude'))
         area = float(data.get('area')) 
-        location = UserLocation.objects.create(
-            user=request.user,
-            latitude=latitude,
-            longitude=longitude,
-            area=area
-        )
-
-        location_data = preprocess_lat_long_data(latitude, longitude, area)
+        # location = UserLocation.objects.create(
+        #     user=request.user,
+        #     latitude=latitude,
+        #     longitude=longitude,
+        #     area=area
+        # )
+        
+        # location_data = preprocess_lat_long_data(latitude, longitude, area)
         
         # # Pass the location data to the LLM
-        llm_response = generate_ai_summary(location_data,"AIzaSyDqMSWju-9GSygVabOtfZbkc1Y3kCnKnRg")
+
+        # llm_response = []
+        # for i in range(len(location_data)):
+        #     llm_response.append(generate_ai_summary(location_data[i], "AIzaSyDqMSWju-9GSygVabOtfZbkc1Y3kCnKnRg"))
+
+        # return JsonResponse({
+        #     'status': 'success',
+        #     'location_id': location.id,
+        #     'message': 'Location saved successfully',
+        #     'lat_long_data': location_data,
+        #     'ai_groundwater': llm_response[0],
+        #     'ai_temperature': llm_response[1],
+        #     'ai_runoff': llm_response[2],
+        #     'ai_water_level': llm_response[3]
+        # })
         return JsonResponse({
-            'status': 'success',
-            'location_id': location.id,
-            'message': 'Location saved successfully',
-            'lat_long_data': location_data,
-            'ai_summary': llm_response
+            'status': 'success'
         })
-        
+       
     else:
         form = LocationForm()
     return render(request, 'location_input.html', {'form': form})
 
 # @login_required
-@csrf_exempt
 def get_location(request, user_id):
     user = get_object_or_404(User, id=user_id)
     if request.user.id != user_id and not request.user.is_staff:

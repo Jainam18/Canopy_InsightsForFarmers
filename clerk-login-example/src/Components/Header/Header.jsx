@@ -2,6 +2,7 @@ import React from 'react';
 import {
     UserButton,
   } from "@clerk/clerk-react";
+  import { Link } from 'react-router-dom';
 
 const Header = () => {
   return (
@@ -11,17 +12,20 @@ const Header = () => {
                 <div className="row align-items-center">
                     {/* <!-- nav and search button --> */}
                     <div className="col-md-6 col-sm-8">
-                        
                         <div className="search-box pull-left">
+                        
                             <form action="#">
                                 <input type="text" name="search" placeholder="Search..." required />
                                 <i className="ti-search"></i>
                             </form>
                         </div>
                     </div>
+                    {/* <div className="col-md-4 col-sm-6 text-center">
+                    <Link to="/"> <img src="./assets/images/icon/logo.png" style={{ width: "75px", margin: "0 auto" }} alt="logo" /></Link>
+                </div> */}
                     {/* <!-- profile info & task notification --> */}
                     <div className="col-md-6 col-sm-4 clearfix">
-                        <ul className="notification-area pull-right">
+                    <ul className="notification-area pull-right">
                             <li id="full-view"><i className="ti-fullscreen"></i></li>
                             <li id="full-view-exit"><i className="ti-zoom-out"></i></li>
                             <li className="dropdown">
