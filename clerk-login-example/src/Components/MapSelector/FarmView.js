@@ -25,7 +25,7 @@ const FarmView = ({ center = [51.505, -0.09], zoom = 13 }) => {
     });
 
     // Add the default layer to the map
-    openStreetMapLayer.addTo(map);
+    esriSatelliteLayer.addTo(map);
 
     // Add layer control to switch between layers
     L.control.layers({
@@ -39,7 +39,7 @@ const FarmView = ({ center = [51.505, -0.09], zoom = 13 }) => {
     };
   }, [center, zoom]);
 
-  return <div ref={mapRef} style={{ height: '500px', width: '100%' }} />;
+  return <div ref={mapRef} style={{ height: '300px', width: '100%' }} />;
 };
 
 export default FarmView;

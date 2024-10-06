@@ -10,7 +10,7 @@ import * as ReactLeafletDraw from 'react-leaflet-draw';
 import styled from 'styled-components';
 
 const MapWrapper = styled.div`
-  height: 600px;
+  height: 500px;
   width: 100%;
   z-index: 0;
 `;
@@ -65,8 +65,13 @@ const FarmSelectionMap = () => {
   const navigate = useNavigate();
   const mapRef = useRef(null);
   const [boundingBox, setBoundingBox] = useState(null);
+
+  const [chartInfo, setChartInfo] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
   console.log(boundingBox, "boundingBox")
-  const handleCreated = (e) => {
+  const handleCreated = async (e) => {
     const { layer } = e;
     if (layer instanceof L.Rectangle) {
       setBoundingBox(layer.getBounds());
@@ -76,6 +81,38 @@ const FarmSelectionMap = () => {
       console.log('Selected Area:');
       console.log('Southwest:', sw.lat, sw.lng);
       console.log('Northeast:', ne.lat, ne.lng);
+      const lat =  (sw.lat + ne.lat)/2
+      const long =  (sw.lng + ne.lng)/2
+      try {
+        const data = await fetch('http://localhost:8000/api/location-input/', {
+          method: 'POST',
+          credentials: 'include',
+
+          headers: {
+            'Content-Type': 'application/json',
+
+            // Add any other headers you need
+          },
+          body: JSON.stringify({
+            // Your data goes here
+            latitude: lat,
+            longitude: long,
+            area: 2
+          })
+        }).then(response => response.json())
+        .then(data => {
+          console.log('Success:', data);
+        })
+        .catch((error) => {
+          console.error('Error:', error);
+        });
+
+        setChartInfo(data);
+        setLoading(false);
+      } catch (err) {
+        setError(err.message);
+        setLoading(false);
+      }
     }
   };
 
@@ -153,7 +190,7 @@ return (
           {boundingBox && <Rectangle bounds={boundingBox} />}
           </FeatureGroup>
 
-          <MapEventHandler center={center} zoom={zoom} />
+          {/* <MapEventHandler center={center} zoom={zoom} /> */}
         </MapContainer>
       </MapWrapper>
       <ButtonContainer>

@@ -24,16 +24,59 @@ const clerkPubKey = process.env.REACT_APP_CLERK_PUBLISHABLE_KEY;
 
 function App() {
 
-  const userInfo = useState(null);
-  // useEffect(() => {
-  //   data = respons
-  // }, [])
+  const [userInfo, setUserInfo] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  useEffect(() => {
+    const fetchUserInfo = async () => {
+      try {
+        const login = await fetch('http://localhost:8000/api/user/login/', {
+          method: 'POST',
+          credentials: 'include',
+
+          headers: {
+            'Content-Type': 'application/json',
+
+            // Add any other headers you need
+          },
+          body: JSON.stringify({
+            // Your data goes here
+            username: 'ABC',
+            password: 'ABC@abc'
+          })
+        }).then(response => response.json())
+        .then(data => {
+          console.log('Success:', data);
+        })
+        .catch((error) => {
+          console.error('Error:', error);
+        });
+
+        const response = await fetch('http://localhost:8000/api/get-location/10', {          credentials: 'include',
+        });
+        
+        if (!response.ok) {
+          throw new Error('Failed to fetch user information');
+        }
+        const data = await response.json();
+        setUserInfo(data);
+        setLoading(false);
+      } catch (err) {
+        setError(err.message);
+        setLoading(false);
+      }
+    };
+
+    fetchUserInfo();
+
+  }, [])
 
   return (
     <ClerkProvider publishableKey={clerkPubKey}>
       <SignedIn>
     <div className="App">
       <BrowserRouter>
+                {!error && !loading &&
                 <div className="app-main-body-container">
                   <div className="app-main-left-body-container">
                   {/* <GlobalStyles /> */}
@@ -58,7 +101,25 @@ function App() {
                       <Route path="/multi-level-menu" element={<Datatable />} />
                     </Routes>
                   </div>
-                </div>
+                </div>}
+                {error && !loading &&
+                <div className="app-main-body-container">
+                  <Header />
+                    <Routes>
+                      <Route path="/" element={<StateSelectionMap />} />
+                      <Route path="/sidebar-types" element={<h1>This is /sidebar-types</h1>} />
+                      <Route path="/ui-features" element={<h1>This is /ui-features</h1>} />
+                      <Route path="/charts" element={<h1>This is /charts</h1>} />
+                      <Route path="/icons" element={<h1>This is /icons</h1>} />
+                      <Route path="/tables" element={<Datatable />} />
+                      <Route path="/state-selection" element={<StateSelectionMap />} />
+                      <Route path="/farm-selection/:stateName" element={<FarmSelectionMap />} />
+                      <Route path="/farm-view/:stateName" element={<FarmView />} />
+                      <Route path="/invoice-summary" element={<h1>This is /invoice-summary</h1>} />
+                      <Route path="/Pages" element={<h1>This is /Pages</h1>} />
+                      <Route path="/multi-level-menu" element={<Datatable />} />
+                    </Routes>
+                </div>}
       </BrowserRouter>
     </div>
       </SignedIn>

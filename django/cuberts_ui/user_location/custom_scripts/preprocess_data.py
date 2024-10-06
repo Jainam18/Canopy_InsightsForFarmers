@@ -119,9 +119,6 @@ def preprocess_lat_long_data(lat, long, area):
             plt.show()
     '''
 
-    print(len(weekly_ground_water_dict.keys()))
-    print(len(weekly_ground_water_dict[2]))
-
     data_dict = {}
 
     for week, vals in weekly_ground_water_dict.items():
