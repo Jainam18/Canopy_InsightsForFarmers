@@ -2,7 +2,9 @@ import h5py
 
 import numpy as np
 import glob
-from collections import defaultdict 
+from collections import defaultdict
+
+from concurrent.futures import ThreadPoolExecutor
 
 # Function to find the nearest index for a given latitude or longitude
 def find_nearest_index(array, value):
@@ -147,13 +149,18 @@ def preprocess_lat_long_data(lat, long, area):
 
         return data_dict
 
-
     res = []
-    for i in range(len(file_pattern)):
-        if i%2==0:
-            res.append(inter_process(file_pattern[i], 52))
-        else:
-            res.append(inter_process(file_pattern[i], 12))
+    with ThreadPoolExecutor(max_workers=4) as executor:
+        params = [
+            (file_pattern_1, 52),
+            (file_pattern_2, 52),
+            (file_pattern_3, 12),
+            (file_pattern_4, 12)
+        ]
+        futures = [executor.submit(inter_process, *param_set) for param_set in params]
+
+        for future in futures:
+            res.append(future.result())
 
     return res
 
